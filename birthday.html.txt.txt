@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Happy Birthday ❤️</title>
+<style>
+  body {
+    margin: 0;
+    background: linear-gradient(180deg, #ffd6ec, #ffb6d9);
+    font-family: Arial, sans-serif;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+
+  .card {
+    position: relative;
+    background: rgba(255,255,255,0.1);
+    padding: 20px;
+    width: 750px;
+    max-width: 90%;
+    border-radius: 14px;
+    text-align: center;
+    color: white;
+    z-index: 2;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+  }
+
+  h1 { margin: 5px 0 10px; font-size: 28px; }
+
+  .shayari {
+    white-space: pre-line;
+    margin-top: 15px;
+    font-size: 18px;
+  }
+
+  .heart-grid {
+    margin: 0 auto;
+    width: 600px;
+    max-width: 90%;
+    display: grid;
+    gap: 6px;
+    justify-content: center;
+  }
+
+  .cell {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    background-size: cover;
+    background-position: center;
+    opacity: 0;
+    transform: scale(0.8);
+    transition: opacity .5s ease, transform .5s ease;
+  }
+  .cell.show {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  canvas { 
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+
+</style>
+</head>
+<body>
+
+<canvas id="fireworks"></canvas>
+
+<div class="card">
+  <h1>🎉 Happy Birthday 🎉</h1>
+
+  <div id="grid" class="heart-grid"></div>
+
+  <div class="shayari">
+18 saal ki hogayi tu, khushiyon ka naya daur shuru,  
+Har pal tera muskuraye, ye dua hai bas tujhe hi dekhu.  
+Zindagi tere rangon se aur bhi khoobsurat lage,  
+Happy 18th Birthday, meri jaan, tu hamesha yu hi chamakti rahe. 💖
+  </div>
+</div>
+
+<script>
+// 👉 Replace with your photo link
+const photoURL = "https://i.imgur.com/w1XW4Np.jpeg";
+
+// Heart pattern
+const pattern = [
+  "0001110011100",
+  "01111111111110",
+  "11111111111111",
+  "11111111111111",
+  "11111111111111",
+  "01111111111110",
+  "00111111111100",
+  "0001111111000",
+  "000011110000",
+  "00000110000"
+];
+
+const grid = document.getElementById("grid");
+const rows = pattern.length;
+const cols = Math.max(...pattern.map(r => r.length));
+
+grid.style.gridTemplateColumns = `repeat(${cols}, auto)`;
+
+let heartCells = [];
+
+for (let r = 0; r < rows; r++) {
+  const row = pattern[r].padEnd(cols, "0");
+  for (let c = 0; c < cols; c++) {
+    const cell = document.createElement("div");
+    cell.className = "cell";
+
+    if (row[c] === "1") {
+      cell.style.backgroundImage = `url('${photoURL}')`;
+      cell.dataset.heart = "1";
+    } else {
+      cell.style.background = "rgba(255,255,255,0.05)";
+      cell.dataset.heart = "0";
+    }
+
+    grid.appendChild(cell);
+    heartCells.push({ el: cell, r, c, isHeart: row[c] === "1" });
+  }
+}
+
+function revealHeart() {
+  let order = heartCells.filter(h => h.isHeart);
+
+  order.sort(() => Math.random() - 0.5);
+
+  order.forEach((h, i) => {
+    setTimeout(() => h.el.classList.add("show"), i * 80);
+  });
+}
+
+window.onload = revealHeart;
+
+
+// ==================== Fireworks =======================
+
+const canvas = document.getElementById("fireworks");
+const ctx = canvas.getContext("2d");
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+let particles = [];
+
+function random(min, max) {
+  return Math.random() * (max - min) + min;
+}
+
+function createFirework() {
+  const x = random(100, canvas.width - 100);
+  const y = random(50, canvas.height / 2);
+  const count = 40;
+
+  for (let i = 0; i < count; i++) {
+    particles.push({
+      x, y,
+      radius: random(2, 4),
+      color: `hsl(${random(0,360)},100%,60%)`,
+      angle: random(0, Math.PI * 2),
+      speed: random(2, 6),
+      alpha: 1
+    });
+  }
+}
+
+function animate() {
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+
+  particles.forEach((p, i) => {
+    p.x += Math.cos(p.angle) * p.speed;
+    p.y += Math.sin(p.angle) * p.speed;
+    p.alpha -= 0.02;
+
+    ctx.globalAlpha = p.alpha;
+    ctx.fillStyle = p.color;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.radius, 0, Math.PI*2);
+    ctx.fill();
+
+    if (p.alpha <= 0) particles.splice(i, 1);
+  });
+
+  requestAnimationFrame(animate);
+}
+
+setInterval(createFirework, 800);
+animate();
+
+</script>
+
+</body>
+</html>
